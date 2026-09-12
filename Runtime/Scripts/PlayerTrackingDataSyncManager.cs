@@ -22,6 +22,7 @@ namespace JanSharp.Internal
         private bool updateLoopShouldBeRunning;
         private bool updateLoopShouldIsRunning;
         private const float UpdateLoopInterval = 0.25f;
+        public const float InterpolationDuration = UpdateLoopInterval + 0.1f;
 
         private void Start()
         {
@@ -140,7 +141,6 @@ namespace JanSharp.Internal
                 playerData.headTime = time;
                 playerData.headPosition = position;
                 playerData.headRotation = rotation;
-                playerData.prevHeadTime = time - 1f; // Prevent division by 0, which could lead to potential NaN.
                 playerData.prevHeadPosition = position;
                 playerData.prevHeadRotation = rotation;
             }
@@ -150,7 +150,6 @@ namespace JanSharp.Internal
                 playerData.leftHandTime = time;
                 playerData.leftHandPosition = position;
                 playerData.leftHandRotation = rotation;
-                playerData.prevLeftHandTime = time - 1f;
                 playerData.prevLeftHandPosition = position;
                 playerData.prevLeftHandRotation = rotation;
             }
@@ -160,7 +159,6 @@ namespace JanSharp.Internal
                 playerData.rightHandTime = time;
                 playerData.rightHandPosition = position;
                 playerData.rightHandRotation = rotation;
-                playerData.prevRightHandTime = time - 1f;
                 playerData.prevRightHandPosition = position;
                 playerData.prevRightHandRotation = rotation;
             }

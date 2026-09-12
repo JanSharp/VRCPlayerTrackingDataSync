@@ -18,16 +18,10 @@ namespace JanSharp
         /// <summary><para>Game state safe.</para></summary>
         [System.NonSerialized] public bool isTrackingHead;
         /// <summary><para>Not game state safe.</para></summary>
-        [System.NonSerialized] public float prevHeadTime;
-        /// <summary><para>Not game state safe.</para></summary>
         [System.NonSerialized] public Vector3 prevHeadPosition;
         /// <summary><para>Not game state safe.</para></summary>
         [System.NonSerialized] public Quaternion prevHeadRotation;
-        /// <summary>
-        /// <para>Must not be equal to <see cref="prevHeadTime"/> while <see cref="isTrackingHead"/> is
-        /// <see langword="true"/>.</para>
-        /// <para>Not game state safe.</para>
-        /// </summary>
+        /// <summary><para>Not game state safe.</para></summary>
         [System.NonSerialized] public float headTime;
         /// <summary><para>Game state safe.</para></summary>
         [System.NonSerialized] public Vector3 headPosition;
@@ -37,16 +31,10 @@ namespace JanSharp
         /// <summary><para>Game state safe.</para></summary>
         [System.NonSerialized] public bool isTrackingLeftHand;
         /// <summary><para>Not game state safe.</para></summary>
-        [System.NonSerialized] public float prevLeftHandTime;
-        /// <summary><para>Not game state safe.</para></summary>
         [System.NonSerialized] public Vector3 prevLeftHandPosition;
         /// <summary><para>Not game state safe.</para></summary>
         [System.NonSerialized] public Quaternion prevLeftHandRotation;
-        /// <summary>
-        /// <para>Must not be equal to <see cref="prevLeftHandTime"/> while <see cref="isTrackingLeftHand"/>
-        /// is <see langword="true"/>.</para>
-        /// <para>Not game state safe.</para>
-        /// </summary>
+        /// <summary><para>Not game state safe.</para></summary>
         [System.NonSerialized] public float leftHandTime;
         /// <summary><para>Game state safe.</para></summary>
         [System.NonSerialized] public Vector3 leftHandPosition;
@@ -56,16 +44,10 @@ namespace JanSharp
         /// <summary><para>Game state safe.</para></summary>
         [System.NonSerialized] public bool isTrackingRightHand;
         /// <summary><para>Not game state safe.</para></summary>
-        [System.NonSerialized] public float prevRightHandTime;
-        /// <summary><para>Not game state safe.</para></summary>
         [System.NonSerialized] public Vector3 prevRightHandPosition;
         /// <summary><para>Not game state safe.</para></summary>
         [System.NonSerialized] public Quaternion prevRightHandRotation;
-        /// <summary>
-        /// <para>Must not be equal to <see cref="prevRightHandTime"/> while <see cref="isTrackingRightHand"/>
-        /// is <see langword="true"/>.</para>
-        /// <para>Not game state safe.</para>
-        /// </summary>
+        /// <summary><para>Not game state safe.</para></summary>
         [System.NonSerialized] public float rightHandTime;
         /// <summary><para>Game state safe.</para></summary>
         [System.NonSerialized] public Vector3 rightHandPosition;
@@ -97,21 +79,21 @@ namespace JanSharp
 
         public void GetCurrentHeadPosition()
         {
-            float percent = (Time.time - prevHeadTime) / (headTime - prevHeadTime);
+            float percent = (Time.time - headTime) / Internal.PlayerTrackingDataSyncManager.InterpolationDuration;
             resultPosition = Vector3.Lerp(prevHeadPosition, headPosition, percent);
             resultRotation = Quaternion.Lerp(prevHeadRotation, headRotation, percent);
         }
 
         public void GetCurrentLeftHandPosition()
         {
-            float percent = (Time.time - prevLeftHandTime) / (leftHandTime - prevLeftHandTime);
+            float percent = (Time.time - leftHandTime) / Internal.PlayerTrackingDataSyncManager.InterpolationDuration;
             resultPosition = Vector3.Lerp(prevLeftHandPosition, leftHandPosition, percent);
             resultRotation = Quaternion.Lerp(prevLeftHandRotation, leftHandRotation, percent);
         }
 
         public void GetCurrentRightHandPosition()
         {
-            float percent = (Time.time - prevRightHandTime) / (rightHandTime - prevRightHandTime);
+            float percent = (Time.time - rightHandTime) / Internal.PlayerTrackingDataSyncManager.InterpolationDuration;
             resultPosition = Vector3.Lerp(prevRightHandPosition, rightHandPosition, percent);
             resultRotation = Quaternion.Lerp(prevRightHandRotation, rightHandRotation, percent);
         }
@@ -150,7 +132,6 @@ namespace JanSharp
                 headTime = time;
                 headPosition = lockstep.ReadVector3();
                 headRotation = lockstep.ReadQuaternion();
-                prevHeadTime = time - 1f; // Prevent division by 0, which could lead to potential NaN.
                 prevHeadPosition = headPosition;
                 prevHeadRotation = headRotation;
             }
@@ -159,7 +140,6 @@ namespace JanSharp
                 leftHandTime = time;
                 leftHandPosition = lockstep.ReadVector3();
                 leftHandRotation = lockstep.ReadQuaternion();
-                prevLeftHandTime = time - 1f;
                 prevLeftHandPosition = leftHandPosition;
                 prevLeftHandRotation = leftHandRotation;
             }
@@ -168,7 +148,6 @@ namespace JanSharp
                 rightHandTime = time;
                 rightHandPosition = lockstep.ReadVector3();
                 rightHandRotation = lockstep.ReadQuaternion();
-                prevRightHandTime = time - 1f;
                 prevRightHandPosition = rightHandPosition;
                 prevRightHandRotation = rightHandRotation;
             }
@@ -176,9 +155,9 @@ namespace JanSharp
 
         public void ReadHeadIncrement()
         {
-            prevHeadTime = headTime;
-            prevHeadPosition = headPosition;
-            prevHeadRotation = headRotation;
+            GetCurrentHeadPosition();
+            prevHeadPosition = resultPosition;
+            prevHeadRotation = resultRotation;
             headTime = Time.time;
             headPosition = lockstep.ReadVector3();
             headRotation = lockstep.ReadQuaternion();
@@ -186,9 +165,9 @@ namespace JanSharp
 
         public void ReadLeftHandIncrement()
         {
-            prevLeftHandTime = leftHandTime;
-            prevLeftHandPosition = leftHandPosition;
-            prevLeftHandRotation = leftHandRotation;
+            GetCurrentLeftHandPosition();
+            prevLeftHandPosition = resultPosition;
+            prevLeftHandRotation = resultRotation;
             leftHandTime = Time.time;
             leftHandPosition = lockstep.ReadVector3();
             leftHandRotation = lockstep.ReadQuaternion();
@@ -196,9 +175,9 @@ namespace JanSharp
 
         public void ReadRightHandIncrement()
         {
-            prevRightHandTime = rightHandTime;
-            prevRightHandPosition = rightHandPosition;
-            prevRightHandRotation = rightHandRotation;
+            GetCurrentRightHandPosition();
+            prevRightHandPosition = resultPosition;
+            prevRightHandRotation = resultRotation;
             rightHandTime = Time.time;
             rightHandPosition = lockstep.ReadVector3();
             rightHandRotation = lockstep.ReadQuaternion();
